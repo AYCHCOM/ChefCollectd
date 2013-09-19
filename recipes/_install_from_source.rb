@@ -43,13 +43,17 @@ tar_file = [
 ].join("")
 tar_source_url = "#{node['collectd']['source_url_prefix']}/#{tar_file}"
 
-ark "collectd" do
-  url tar_source_url
-  version node['collectd']['version']
-  checksum node['collectd']['checksum']
-  autoconf_opts user_autoconf_options
-  prefix_root node['collectd']['prefix_dir']
-  path node['collectd']['src_dir']
-  creates "#{node['collectd']['sbin_dir']}/collectd"
-  action [:configure, :install_with_make]
+remote_file "/usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}" do
+  source tar_source_url
+  not_if "test -f /usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
+end
+
+execute "unpack collectd" do
+  cwd "/usr/local/src/"
+  command "tar xvfz #{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
+end
+
+execute "compile and install collectd" do
+  cwd "/usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
+  command "./configure #{user_autoconf_options.join(' ')} && make && make install"
 end
