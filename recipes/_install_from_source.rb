@@ -18,6 +18,9 @@
 include_recipe "build-essential"
 include_recipe "ark"
 
+package "libprotobuf-c0-dev"
+package "protobuf-c-compiler"
+
 node['collectd']['build_prereq_pkgs'].each do |build_pkgs|
   package build_pkgs
 end
@@ -25,7 +28,8 @@ end
 user_autoconf_options = [
   "--prefix=#{node['collectd']['prefix_dir']}",
   "--sysconfdir=#{node['collectd']['sysconf_dir']}",
-  "--bindir=#{node['collectd']['bin_dir']}"
+  "--bindir=#{node['collectd']['bin_dir']}",
+  "--enable-write-riemann"
 ]
 
 unless node['collectd']['autoconf_opts'].nil?
