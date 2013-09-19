@@ -45,15 +45,17 @@ tar_source_url = "#{node['collectd']['source_url_prefix']}/#{tar_file}"
 
 remote_file "/usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}" do
   source tar_source_url
-  not_if "test -f /usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
+  not_if "test -d /usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
 end
 
 execute "unpack collectd" do
   cwd "/usr/local/src/"
   command "tar xvfz #{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
+  not_if "test -d /usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
 end
 
 execute "compile and install collectd" do
   cwd "/usr/local/src/#{node['collectd']['source_tar_name_prefix']}#{node['collectd']['version']}"
   command "./configure #{user_autoconf_options.join(' ')} && make && make install"
+  not_if "collectd -h | grep #{node['collectd']['version']}"
 end
